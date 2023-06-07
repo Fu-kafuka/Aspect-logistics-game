@@ -10,6 +10,7 @@ import javax.swing.JScrollPane;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.geom.Ellipse2D;
+import java.awt.geom.Line2D;
 
 import javax.swing.JTabbedPane;
 import javax.swing.BoxLayout;
@@ -130,11 +131,14 @@ class mapCanvas extends Canvas{
 	int h = 720;
 	
 	Graphics2D g2d;
-	Ellipse2D.Double[] ellipse;
 	BufferedImage cImage = null;
 	
 	BasicStroke basicStroke;
 	BasicStroke dottedStroke;
+	
+	Ellipse2D.Double[] ellipse;
+	Line2D.Double[] line2D;
+	
 	
 	public mapCanvas() {//初期化処理
 		cImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
@@ -144,19 +148,29 @@ class mapCanvas extends Canvas{
 		
 		//アンチエイリアス設定
 		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-		
-		//背景画像設定
-		g2d.setBackground(Color.white);
-		ellipse = new Ellipse2D.Double[logistics_game.circleNum];
-		for(int i = 0;i < logistics_game.circleNum;i++) {
-			ellipse[i] = new Ellipse2D.Double(logistics_game.circleposx[i], logistics_game.circleposy[i], logistics_game.circleSize, logistics_game.circleSize);
-		}
+
 		
 		//通常線
 		basicStroke = new BasicStroke(3.0f);
 		
 		//破線
 		dottedStroke = new BasicStroke(3.0f,BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER,10.0f,new float[] {4.0f, 2.0f},0.0f); 
+	
+
+		//背景円描画設定
+		ellipse = new Ellipse2D.Double[logistics_game.circleNum];
+		for(int i = 0;i < logistics_game.circleNum;i++) {
+			ellipse[i] = new Ellipse2D.Double(logistics_game.circleposx[i], logistics_game.circleposy[i], logistics_game.circleSize, logistics_game.circleSize);
+		}
+		
+		//背景線描画設定
+		line2D = new Line2D.Double[logistics_game.passNum];
+		for(int i = 0;i<logistics_game.passNum;i++) {
+			line2D[i] = new Line2D.Double(  logistics_game.circleposx[logistics_game.node1[i]] + logistics_game.circleSize/2,
+											logistics_game.circleposy[logistics_game.node1[i]] + logistics_game.circleSize/2,
+											logistics_game.circleposx[logistics_game.node2[i]] + logistics_game.circleSize/2,
+											logistics_game.circleposy[logistics_game.node2[i]] + logistics_game.circleSize/2);
+		}
 	}
 	
 	@Override
@@ -167,8 +181,16 @@ class mapCanvas extends Canvas{
 		g2d.setStroke(basicStroke);
 		//g2d.setStroke(dottedStroke);
 		
-		for(Ellipse2D.Double i:ellipse) {
+		for(Ellipse2D.Double i:ellipse) {//円描画
 			g2d.draw(i);
+		}
+		
+		//線描画
+		for(int i = 0;i<logistics_game.passNum;i++) {
+			if (i+1 > logistics_game.passNum - logistics_game.highCostPassNum) {
+				g2d.setStroke(dottedStroke); //破線に切り替え
+			}
+			g2d.draw(line2D[i]);
 		}
 		
 		//バッファを描画
