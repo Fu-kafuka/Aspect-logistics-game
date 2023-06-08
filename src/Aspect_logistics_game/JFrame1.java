@@ -139,7 +139,6 @@ class mapCanvas extends Canvas{
 	Ellipse2D.Double[] ellipse;
 	Line2D.Double[] line2D;
 	
-	
 	public mapCanvas() {//初期化処理
 		cImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
 		g2d = cImage.createGraphics();// 画像バッファを生成
@@ -171,6 +170,10 @@ class mapCanvas extends Canvas{
 											logistics_game.circleposx[logistics_game.node2[i]] + logistics_game.circleSize/2,
 											logistics_game.circleposy[logistics_game.node2[i]] + logistics_game.circleSize/2);
 		}
+		
+		//ノード番号描画設定
+		Font font = new Font("Meiryo",Font.PLAIN,20);
+		g2d.setFont(font);
 	}
 	
 	@Override
@@ -191,6 +194,11 @@ class mapCanvas extends Canvas{
 				g2d.setStroke(dottedStroke); //破線に切り替え
 			}
 			g2d.draw(line2D[i]);
+		}
+		
+		//ノード番号描画
+		for(int i = 0;i<logistics_game.circleNum;i++) {
+			g2d.drawString(Integer.toString(i), logistics_game.circleposx[i], logistics_game.circleposy[i]);
 		}
 		
 		//バッファを描画

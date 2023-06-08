@@ -11,7 +11,7 @@ public class logistics_game {
 	public static final int circleNum = 9;
 	public static final int circleSize = 100;
 	public static final int[] circleposx = {10, 200,400,500,650,700,800,950,1100}; // ノードの位置
-	public static final int[] circleposy = {600,550,200,400,600,0  ,300,550 ,400};
+	public static final int[] circleposy = {600,550,200,400,600,50 ,300,550 ,400};
 	
 	public static final int passNum = 10;//経路の経由地点とコスト
 	public static final int highCostPassNum = 2;
