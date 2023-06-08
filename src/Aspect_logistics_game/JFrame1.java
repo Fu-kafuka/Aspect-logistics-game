@@ -3,6 +3,8 @@ import java.awt.BorderLayout;
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import java.awt.GridBagLayout;
@@ -13,20 +15,31 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 
 import javax.swing.JTabbedPane;
+import javax.imageio.ImageIO;
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
+
 import java.awt.Canvas;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.awt.Color;
 import java.awt.*;
+
+import java.util.List;
+import javax.swing.JMenuBar;
+import javax.swing.JRadioButtonMenuItem;
+import javax.swing.JPopupMenu; 
 
 public class JFrame1 extends JFrame {//メイン画面制御クラス
 
 	private JPanel contentPane;
 	private Canvas canvas;
 	private mapCanvas mapcanvas;
+	private JMenu[] moveMenu;
 	
 	/**
 	 * Launch the application.
@@ -75,21 +88,35 @@ public class JFrame1 extends JFrame {//メイン画面制御クラス
 		
 		JPanel loadingPanel = new JPanel();
 		loadingTab.setViewportView(loadingPanel);
-		loadingPanel.setLayout(new BoxLayout(loadingPanel, BoxLayout.X_AXIS));
+		loadingPanel.setLayout(new BoxLayout(loadingPanel, BoxLayout.Y_AXIS));
 		
 		JScrollPane unloadingTab = new JScrollPane();
 		tabbedPane.addTab("荷降ろし", null, unloadingTab, null);
 		
 		JPanel unloadingPanel = new JPanel();
 		unloadingTab.setViewportView(unloadingPanel);
-		unloadingPanel.setLayout(new BoxLayout(unloadingPanel, BoxLayout.X_AXIS));
+		unloadingPanel.setLayout(new BoxLayout(unloadingPanel, BoxLayout.Y_AXIS));
 		
 		JScrollPane MoveTab = new JScrollPane();
 		tabbedPane.addTab("移動", null, MoveTab, null);
 		
 		JPanel MovePanel = new JPanel();
 		MoveTab.setViewportView(MovePanel);
-		MovePanel.setLayout(new BoxLayout(MovePanel, BoxLayout.X_AXIS));
+		MovePanel.setLayout(new BoxLayout(MovePanel, BoxLayout.Y_AXIS));
+		
+		JButton confirmButton = new JButton("移動確定");
+		MovePanel.add(confirmButton);
+		
+		//移動メニューの設置
+		/*
+		moveMenu = new JMenu[logistics_game.truckNum];
+		for(int i = 0;i<logistics_game.truckNum;i++) {
+			moveMenu[i]=new JMenu("行動");
+			MovePanel.add(moveMenu[i]);
+			JMenuItem menuItem = new JMenuItem("トラック"+Integer.toString(i));
+			moveMenu[i].add(menuItem);
+			
+		}*/
 		
 		JPanel mapPanel = new JPanel();
 		GridBagConstraints gbc_mapPanel = new GridBagConstraints();
@@ -103,6 +130,7 @@ public class JFrame1 extends JFrame {//メイン画面制御クラス
 		
 		mapcanvas = new mapCanvas(); // canvasを継承して独自処理を実施 
 		canvas = mapcanvas;
+		//canvas = new Canvas(); //後で消す
 		mapPanel.add(canvas);
 		
 		JScrollPane cargoStatusScroll = new JScrollPane();
@@ -117,91 +145,10 @@ public class JFrame1 extends JFrame {//メイン画面制御クラス
 		cargoStatusScroll.setViewportView(cargoStatus);
 		cargoStatus.setLayout(new BoxLayout(cargoStatus, BoxLayout.X_AXIS));
 		
-		// 以下個別描画処理
+
 		
 	}
 	
-	public void drawMap() {
-		
-	}
 }
 
-class mapCanvas extends Canvas{
-	int w = 1280; // 画面サイズ
-	int h = 720;
-	
-	Graphics2D g2d;
-	BufferedImage cImage = null;
-	
-	BasicStroke basicStroke;
-	BasicStroke dottedStroke;
-	
-	Ellipse2D.Double[] ellipse;
-	Line2D.Double[] line2D;
-	
-	public mapCanvas() {//初期化処理
-		cImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
-		g2d = cImage.createGraphics();// 画像バッファを生成
-		g2d.setBackground(Color.white); // バックグラウンドとサイズ設定
-		setPreferredSize(new Dimension(w,h));
-		
-		//アンチエイリアス設定
-		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-		
-		//通常線
-		basicStroke = new BasicStroke(3.0f);
-		
-		//破線
-		dottedStroke = new BasicStroke(3.0f,BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER,10.0f,new float[] {4.0f, 2.0f},0.0f); 
-	
-
-		//背景円描画設定
-		ellipse = new Ellipse2D.Double[logistics_game.circleNum];
-		for(int i = 0;i < logistics_game.circleNum;i++) {
-			ellipse[i] = new Ellipse2D.Double(logistics_game.circleposx[i], logistics_game.circleposy[i], logistics_game.circleSize, logistics_game.circleSize);
-		}
-		
-		//背景線描画設定
-		line2D = new Line2D.Double[logistics_game.passNum];
-		for(int i = 0;i<logistics_game.passNum;i++) {
-			line2D[i] = new Line2D.Double(  logistics_game.circleposx[logistics_game.node1[i]] + logistics_game.circleSize/2,
-											logistics_game.circleposy[logistics_game.node1[i]] + logistics_game.circleSize/2,
-											logistics_game.circleposx[logistics_game.node2[i]] + logistics_game.circleSize/2,
-											logistics_game.circleposy[logistics_game.node2[i]] + logistics_game.circleSize/2);
-		}
-		
-		//ノード番号描画設定
-		Font font = new Font("Meiryo",Font.PLAIN,20);
-		g2d.setFont(font);
-	}
-	
-	@Override
-	public void paint(Graphics g) {//フレーム毎の描画処理
-		g2d.clearRect(0, 0, w, h);
-		g2d.setColor(Color.black);
-		
-		g2d.setStroke(basicStroke);
-		//g2d.setStroke(dottedStroke);
-		
-		for(Ellipse2D.Double i:ellipse) {//円描画
-			g2d.draw(i);
-		}
-		
-		//線描画
-		for(int i = 0;i<logistics_game.passNum;i++) {
-			if (i+1 > logistics_game.passNum - logistics_game.highCostPassNum) {
-				g2d.setStroke(dottedStroke); //破線に切り替え
-			}
-			g2d.draw(line2D[i]);
-		}
-		
-		//ノード番号描画
-		for(int i = 0;i<logistics_game.circleNum;i++) {
-			g2d.drawString(Integer.toString(i), logistics_game.circleposx[i], logistics_game.circleposy[i]);
-		}
-		
-		//バッファを描画
-		g.drawImage(cImage,0,0,null);
-	}
-}
